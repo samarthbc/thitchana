@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>A Night Under the Stars</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
+    <script src="https://kit.fontawesome.com/1c762e8f6c.js" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Great+Vibes&display=swap"
+        rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Yusei+Magic&display=swap" rel="stylesheet">
+
+    <style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+    <style>
+        .custom-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: #4B5563 transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #4B5563;
+            border-radius: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background-color: #6B7280;
+        }
+    </style>
+
+    <style>
+        .sparkle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: white;
+            opacity: 0.6;
+            animation: sparkle 2s infinite ease-in-out;
+            filter: blur(1px);
+            pointer-events: none;
+        }
+
+        .sparkle1 {
+            top: -10px;
+            left: -20px;
+            animation-delay: 0s;
+        }
+
+        .sparkle2 {
+            top: 0;
+            right: -25px;
+            animation-delay: 1s;
+        }
+
+        .sparkle3 {
+            bottom: -10px;
+            left: 10px;
+            animation-delay: 1.5s;
+        }
+
+        @keyframes sparkle {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+
+            50% {
+                transform: scale(1.8);
+                opacity: 0.9;
+            }
+        }
+    </style>
+
+
+</head>
+
+<body class="m-0 p-0 h-screen w-screen overflow-hidden bg-black">
+
+    <div
+        class="absolute top-4 left-1/2 transform -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded-lg shadow-lg flex gap-3 z-50">
+        <button onclick="setSky('2005')" class="hover:bg-white/10 px-4 py-1 rounded border border-white">May 31,
+            2005</button>
+        <button onclick="setSky('2025')" class="hover:bg-white/10 px-4 py-1 rounded border border-white">May 31,
+            2025</button>
+        <button onclick="setSky('now')" class="hover:bg-white/10 px-4 py-1 rounded border border-white">Now</button>
+    </div>
+
+    <iframe id="skyIframe" class="w-full h-full"
+        src="https://virtualsky.lco.global/embed/index.html?longitude=77.5775&latitude=12.9629&projection=stereo&meteorshowers=true&showstarlabels=true&az=75.5">
+    </iframe>
+
+    <div class="absolute top-4 right-16 z-50 me-4">
+        <div class="relative group">
+            <button id="volumeToggle"
+                class="text-white p-2 rounded-full shadow-lg hover:bg-white/10 transition text-2xl">
+                <i id="volumeIcon" class="fa-solid fa-volume-high"></i>
+            </button>
+
+            <!-- Slider (hidden by default, appears on hover or toggle) -->
+            <input id="volumeSlider" type="range" min="0" max="100" value="100"
+                class="absolute right-full mr-2 top-1/2 -translate-y-1/2 w-24 h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer transition-opacity duration-300 opacity-0 group-hover:opacity-100" />
+        </div>
+    </div>
+
+
+
+    <div class="absolute top-4 right-4 z-50">
+        <button onclick="toggleMenu()"
+            class="text-white p-2 rounded-full shadow-lg hover:bg-white/10 transition text-3xl">
+            <i class="fa-solid fa-hat-wizard"></i>
+        </button>
+    </div>
+    <div id="yearMenu"
+        class="hidden absolute top-16 right-4 max-h-[70vh] w-40 bg-black/80 text-white rounded-lg shadow-lg overflow-y-auto custom-scrollbar p-2 z-50 space-y-1">
+    </div>
+
+
+    <script>
+        function setSky(date) {
+            if (date === "now") {
+                document.getElementById("skyIframe").src = "https://virtualsky.lco.global/embed/index.html?longitude=77.5775&latitude=12.9629&projection=stereo&meteorshowers=true&showstarlabels=true&az=75.5"
+            } else {
+                document.getElementById("skyIframe").src = "https://virtualsky.lco.global/embed/index.html?longitude=77.5775&latitude=12.9629&projection=stereo&meteorshowers=true&showstarlabels=true&clock=May%2031%20" + date + "%2000:00:00%20GMT+0530%20(India%20Standard%20Time)";
+            }
+        }
+    </script>
+
+    <script>
+        const yearMenu = document.getElementById('yearMenu');
+
+        const nowBtn = document.createElement('button');
+        nowBtn.textContent = "Now";
+        nowBtn.className = "w-full text-left px-3 py-1 rounded hover:bg-white/10";
+        nowBtn.onclick = () => { setSky("now"); toggleMenu(); };
+        yearMenu.appendChild(nowBtn);
+
+        for (let i = 2005; i <= 2025; i++) {
+            const btn = document.createElement('button');
+            btn.textContent = `May 31, ${i}`;
+            btn.className = "w-full text-left px-3 py-1 rounded hover:bg-white/10";
+            btn.onclick = () => { setSky(i); toggleMenu(); };
+            yearMenu.appendChild(btn);
+        }
+
+        function toggleMenu() {
+            yearMenu.classList.toggle('hidden');
+        }
+    </script>
+
+    <script>
+        tsParticles.load("tsparticles", {
+            background: {
+                color: {
+                    value: "transparent"
+                }
+            },
+            fpsLimit: 60,
+            particles: {
+                number: {
+                    value: 80,
+                    density: {
+                        enable: true,
+                        area: 800
+                    }
+                },
+                color: {
+                    value: "#FFA500"
+                },
+                opacity: {
+                    value: 0.5,
+                    random: true
+                },
+                size: {
+                    value: 1.5,
+                    random: true
+                },
+                move: {
+                    enable: true,
+                    speed: 0.1,
+                    direction: "none",
+                    outMode: "bounce"
+                }
+            },
+            detectRetina: true
+        });
+    </script>
+
+    <audio id="bgMusic" autoplay loop hidden>
+        <source src="background.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <script>
+        const music = document.getElementById("bgMusic");
+        const volumeIcon = document.getElementById("volumeIcon");
+        const volumeSlider = document.getElementById("volumeSlider");
+
+        // Volume icon changes based on slider
+        volumeSlider.addEventListener("input", () => {
+            const vol = volumeSlider.value / 100;
+            music.volume = vol;
+
+            if (vol === 0) {
+                volumeIcon.className = "fa-solid fa-volume-xmark";
+            } else if (vol <= 0.3) {
+                volumeIcon.className = "fa-solid fa-volume-off";
+            } else if (vol <= 0.6) {
+                volumeIcon.className = "fa-solid fa-volume-low";
+            } else {
+                volumeIcon.className = "fa-solid fa-volume-high";
+            }
+        });
+
+        // Handle autoplay block
+        document.addEventListener("click", () => {
+            if (music.paused) {
+                music.play().catch(() => { });
+            }
+        }, { once: true });
+    </script>iv>
+    </span>
+    </div>
+
+    <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white text-center text-sm bg-black/30 px-4 py-2 rounded-lg shadow-md backdrop-blur-sm z-50 transition-opacity duration-700 flex items-center gap-2"
+        id="quoteContainer"
+        style="font-family: 'Yusei Magic', cursive; text-shadow: 0 0 6px rgba(255, 255, 255, 0.2), 0 0 12px rgba(173, 216, 230, 0.3);">
+
+        <div class="sparkle sparkle1"></div>
+        <div class="sparkle sparkle2"></div>
+        <div class="sparkle sparkle3"></div>
+
+        <!-- Quote text -->
+        <span id="sweetMessage" class="transition-opacity duration-500 ease-in-out">
+            “The sky whispers secrets to those who dream.”
+        </span>
+
+        <!-- Hoverable ✨ emoji and secret message -->
+        <div class="relative group">
+            <span class="text-white text-lg cursor-pointer hover:animate-pulse transition">✨</span>
+            <div
+                class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-max bg-black/10 text-white text-xs rounded px-2 py-1 shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap">
+                Some stars light up more than just the sky ✨ <br />
+                You're the star that inspired this night sky ✨
+            </div>
+        </div>
+    </div>
+
+
+
+    <script>
+        const quotes = [
+            "“The sky whispers secrets to those who dream.”",
+            "“Every night holds a promise of wonder.”",
+            "“In stardust, we are born.”",
+            "“Let your soul drift where the stars sleep.”",
+            "“The cosmos is within us; we are made of star stuff.”",
+            "“Across the universe, dreams travel on beams of starlight.”",
+            "“Catch a falling star and make a wish.”",
+            "“The night sky is a canvas painted with dreams.”",
+            "“We look at the same stars and see different stories.”",
+            "“Beneath this vast sky, we are all connected.”",
+            "“To the stars who listen—and the dreams that are answered.”",
+            "“Silence of the night speaks louder than words.”",
+            "“One star at a time, the night writes its lullaby.”",
+            "“Even the darkest nights will end, and stars will shine.”",
+            "“Some nights the sky wraps you in a blanket of wonder.”"
+        ];
+
+
+        const sweetMessage = document.getElementById("sweetMessage");
+        const quoteContainer = document.getElementById("quoteContainer");
+
+        setInterval(() => {
+            // Fade out
+            quoteContainer.classList.add("opacity-0");
+
+            setTimeout(() => {
+                // Change text while faded out
+                const randomIndex = Math.floor(Math.random() * quotes.length);
+                sweetMessage.textContent = quotes[randomIndex];
+
+                // Fade back in
+                quoteContainer.classList.remove("opacity-0");
+            }, 700); // Match this with CSS transition-duration
+        }, 7000); // Change every 7 seconds
+    </script>
+
+    <!-- Made by link -->
+    <a href="https://github.com/samarthbc" target="_blank" rel="noopener noreferrer"
+        class="fixed bottom-2 right-4 text-white text-xs opacity-70 hover:opacity-100 transition-opacity duration-300 z-50"
+        style="font-family: 'Yusei Magic', cursive; text-shadow: 0 0 4px rgba(255, 255, 255, 0.2);">
+        Made by Samarth ✨❤️
+    </a>
+
+
+</body>
+
+</html>
