@@ -5,16 +5,25 @@
     <meta charset="UTF-8">
     <title>A Night Under the Stars</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- External Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
     <script src="https://kit.fontawesome.com/1c762e8f6c.js" crossorigin="anonymous"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Great+Vibes&display=swap"
-        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Yusei+Magic&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Great+Vibes&family=Yusei+Magic&display=swap"
+        rel="stylesheet">
 
+    <!-- Styles -->
     <style>
+        /* =========================
+           SCROLLBAR STYLES
+        ========================= */
         .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
@@ -23,8 +32,7 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
-    </style>
-    <style>
+
         .custom-scrollbar {
             scrollbar-width: thin;
             scrollbar-color: #4B5563 transparent;
@@ -46,9 +54,90 @@
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background-color: #6B7280;
         }
-    </style>
 
-    <style>
+        /* =========================
+           SHOOTING STAR ANIMATION
+        ========================= */
+        .shooting-star {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #fff 0%, #87CEEB 50%, #FFD700 100%);
+            box-shadow:
+                0 0 10px 3px #fff,
+                0 0 20px 6px #87CEEB,
+                0 0 30px 10px #FFD700;
+            pointer-events: none;
+            z-index: 9999;
+            filter: drop-shadow(0 0 4px white);
+        }
+
+        .shooting-star::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 100%;
+            height: 3px;
+            width: 200px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.9) 0%, rgba(135, 206, 235, 0.6) 30%, rgba(255, 255, 255, 0) 100%);
+            transform-origin: left center;
+            transform: translateY(-50%);
+            filter: blur(1px);
+            border-radius: 50%;
+        }
+
+        @keyframes shooting-star-move {
+            0% {
+                opacity: 0;
+                transform: translateX(var(--start-x)) translateY(var(--start-y)) scale(0.3);
+            }
+
+            10% {
+                opacity: 1;
+                transform: translateX(calc(var(--start-x) + 10vw)) translateY(calc(var(--start-y) + 8vh)) scale(1);
+            }
+
+            90% {
+                opacity: 0.8;
+                transform: translateX(var(--end-x)) translateY(var(--end-y)) scale(0.8);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateX(var(--end-x)) translateY(var(--end-y)) scale(0);
+            }
+        }
+
+        /* Small sparkle trailing dots */
+        .trail-sparkle {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: radial-gradient(circle, #fff 0%, #87CEEB 100%);
+            border-radius: 50%;
+            opacity: 0.8;
+            filter: blur(1px);
+            z-index: 9998;
+            animation: sparkle-fade 1.5s ease-out forwards;
+            pointer-events: none;
+        }
+
+        @keyframes sparkle-fade {
+            0% {
+                opacity: 0.8;
+                transform: scale(1);
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(0);
+            }
+        }
+
+        /* =========================
+            SPARKLE ANIMATIONS
+        ========================= */
         .sparkle {
             position: absolute;
             width: 6px;
@@ -92,41 +181,88 @@
                 opacity: 0.9;
             }
         }
+
+        /* =========================
+    FADE IN ANIMATIONS
+    ========================= */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 1s ease-out forwards;
+            opacity: 0;
+        }
+
+        .delay-200 {
+            animation-delay: 0.2s;
+        }
     </style>
-
-
 </head>
 
 <body class="m-0 p-0 h-screen w-screen overflow-hidden bg-black">
 
-    <div
-        class="absolute top-4 left-1/2 transform -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded-lg shadow-lg flex gap-3 z-50">
-        <button onclick="setSky('2005')" class="hover:bg-white/10 px-4 py-1 rounded border border-white">May 31,
-            2005</button>
-        <button onclick="setSky('2025')" class="hover:bg-white/10 px-4 py-1 rounded border border-white">May 31,
-            2025</button>
-        <button onclick="setSky('now')" class="hover:bg-white/10 px-4 py-1 rounded border border-white">Now</button>
+    <!-- =========================
+         BIRTHDAY SPLASH SCREEN
+    ========================= -->
+    <div id="birthdaySplash"
+        class="fixed inset-0 bg-gradient-to-br from-yellow-500 via-orange-500 to-yellow-700 flex flex-col items-center justify-center z-60 text-white text-center">
+        <h1 class="text-4xl md:text-6xl font-bold mb-4 animate-fade-in" style="font-family: Great Vibes;">
+            🎉 Happy Birthday Thitchana!! 🎉
+        </h1>
+        <p class="text-xl md:text-2xl animate-fade-in delay-200" style="font-family: Great Vibes;">
+            ✨ Wishing you a magical day under the stars ✨
+        </p>
     </div>
 
+    <!-- =========================
+         DATE SELECTION BUTTONS
+    ========================= -->
+    <div
+        class="absolute top-4 left-1/2 transform -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded-lg shadow-lg flex gap-3 z-50">
+        <button onclick="setSky('2005')" class="hover:bg-white/10 px-4 py-1 rounded border border-white">
+            May 31, 2005
+        </button>
+        <button onclick="setSky('2025')" class="hover:bg-white/10 px-4 py-1 rounded border border-white">
+            May 31, 2025
+        </button>
+        <button onclick="setSky('now')" class="hover:bg-white/10 px-4 py-1 rounded border border-white">
+            Now
+        </button>
+    </div>
+
+    <!-- =========================
+         SKY IFRAME
+    ========================= -->
     <iframe id="skyIframe" class="w-full h-full"
         src="https://virtualsky.lco.global/embed/index.html?longitude=77.5775&latitude=12.9629&projection=stereo&meteorshowers=true&showstarlabels=true&az=75.5">
     </iframe>
 
+    <!-- =========================
+         VOLUME CONTROL
+    ========================= -->
     <div class="absolute top-4 right-16 z-50 me-4">
         <div class="relative group">
             <button id="volumeToggle"
                 class="text-white p-2 rounded-full shadow-lg hover:bg-white/10 transition text-2xl">
                 <i id="volumeIcon" class="fa-solid fa-volume-high"></i>
             </button>
-
-            <!-- Slider (hidden by default, appears on hover or toggle) -->
             <input id="volumeSlider" type="range" min="0" max="100" value="100"
                 class="absolute right-full mr-2 top-1/2 -translate-y-1/2 w-24 h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer transition-opacity duration-300 opacity-0 group-hover:opacity-100" />
         </div>
     </div>
 
-
-
+    <!-- =========================
+         MENU BUTTON & DROPDOWN
+    ========================= -->
     <div class="absolute top-4 right-4 z-50">
         <button onclick="toggleMenu()"
             class="text-white p-2 rounded-full shadow-lg hover:bg-white/10 transition text-3xl">
@@ -137,113 +273,19 @@
         class="hidden absolute top-16 right-4 max-h-[70vh] w-40 bg-black/80 text-white rounded-lg shadow-lg overflow-y-auto custom-scrollbar p-2 z-50 space-y-1">
     </div>
 
-
-    <script>
-        function setSky(date) {
-            if (date === "now") {
-                document.getElementById("skyIframe").src = "https://virtualsky.lco.global/embed/index.html?longitude=77.5775&latitude=12.9629&projection=stereo&meteorshowers=true&showstarlabels=true&az=75.5"
-            } else {
-                document.getElementById("skyIframe").src = "https://virtualsky.lco.global/embed/index.html?longitude=77.5775&latitude=12.9629&projection=stereo&meteorshowers=true&showstarlabels=true&clock=May%2031%20" + date + "%2000:00:00%20GMT+0530%20(India%20Standard%20Time)";
-            }
-        }
-    </script>
-
-    <script>
-        const yearMenu = document.getElementById('yearMenu');
-
-        const nowBtn = document.createElement('button');
-        nowBtn.textContent = "Now";
-        nowBtn.className = "w-full text-left px-3 py-1 rounded hover:bg-white/10";
-        nowBtn.onclick = () => { setSky("now"); toggleMenu(); };
-        yearMenu.appendChild(nowBtn);
-
-        for (let i = 2005; i <= 2025; i++) {
-            const btn = document.createElement('button');
-            btn.textContent = `May 31, ${i}`;
-            btn.className = "w-full text-left px-3 py-1 rounded hover:bg-white/10";
-            btn.onclick = () => { setSky(i); toggleMenu(); };
-            yearMenu.appendChild(btn);
-        }
-
-        function toggleMenu() {
-            yearMenu.classList.toggle('hidden');
-        }
-    </script>
-
-    <script>
-        tsParticles.load("tsparticles", {
-            background: {
-                color: {
-                    value: "transparent"
-                }
-            },
-            fpsLimit: 60,
-            particles: {
-                number: {
-                    value: 80,
-                    density: {
-                        enable: true,
-                        area: 800
-                    }
-                },
-                color: {
-                    value: "#FFA500"
-                },
-                opacity: {
-                    value: 0.5,
-                    random: true
-                },
-                size: {
-                    value: 1.5,
-                    random: true
-                },
-                move: {
-                    enable: true,
-                    speed: 0.1,
-                    direction: "none",
-                    outMode: "bounce"
-                }
-            },
-            detectRetina: true
-        });
-    </script>
-
-    <audio id="bgMusic" autoplay loop hidden>
-        <source src="background.mp3" type="audio/mpeg">
-        Your browser does not support the audio element.
-    </audio>
-
-    <script>
-        const music = document.getElementById("bgMusic");
-        const volumeIcon = document.getElementById("volumeIcon");
-        const volumeSlider = document.getElementById("volumeSlider");
-
-        // Volume icon changes based on slider
-        volumeSlider.addEventListener("input", () => {
-            const vol = volumeSlider.value / 100;
-            music.volume = vol;
-
-            if (vol === 0) {
-                volumeIcon.className = "fa-solid fa-volume-xmark";
-            } else if (vol <= 0.3) {
-                volumeIcon.className = "fa-solid fa-volume-off";
-            } else if (vol <= 0.6) {
-                volumeIcon.className = "fa-solid fa-volume-low";
-            } else {
-                volumeIcon.className = "fa-solid fa-volume-high";
-            }
-        });
-
-        // Handle autoplay block
-        document.addEventListener("click", () => {
-            if (music.paused) {
-                music.play().catch(() => { });
-            }
-        }, { once: true });
-    </script>iv>
-    </span>
+    <!-- =========================
+         MAKE A WISH BUTTON
+    ========================= -->
+    <div class="absolute bottom-2 left-2 bg-black/50 text-white px-4 py-2 rounded-lg shadow-lg z-50">
+        <button id="makeWishBtn" onclick="makeWish()" class="w-full text-left px-3 py-1 rounded hover:bg-white/10"
+            style="font-family: 'Yusei Magic', cursive; text-shadow: 0 0 3px rgba(0, 0, 0, 0.3);">
+            ⭐ Make a Wish ⭐
+        </button>
     </div>
 
+    <!-- =========================
+         QUOTE CONTAINER
+    ========================= -->
     <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white text-center text-sm bg-black/30 px-4 py-2 rounded-lg shadow-md backdrop-blur-sm z-50 transition-opacity duration-700 flex items-center gap-2"
         id="quoteContainer"
         style="font-family: 'Yusei Magic', cursive; text-shadow: 0 0 6px rgba(255, 255, 255, 0.2), 0 0 12px rgba(173, 216, 230, 0.3);">
@@ -252,12 +294,10 @@
         <div class="sparkle sparkle2"></div>
         <div class="sparkle sparkle3"></div>
 
-        <!-- Quote text -->
         <span id="sweetMessage" class="transition-opacity duration-500 ease-in-out">
-            “The sky whispers secrets to those who dream.”
+            "The sky whispers secrets to those who dream."
         </span>
 
-        <!-- Hoverable ✨ emoji and secret message -->
         <div class="relative group">
             <span class="text-white text-lg cursor-pointer hover:animate-pulse transition">✨</span>
             <div
@@ -268,53 +308,391 @@
         </div>
     </div>
 
+    <!-- =========================
+         AUDIO ELEMENT
+    ========================= -->
+    <audio id="bgMusic" autoplay loop hidden>
+        <source src="background.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
 
-
-    <script>
-        const quotes = [
-            "“The sky whispers secrets to those who dream.”",
-            "“Every night holds a promise of wonder.”",
-            "“In stardust, we are born.”",
-            "“Let your soul drift where the stars sleep.”",
-            "“The cosmos is within us; we are made of star stuff.”",
-            "“Across the universe, dreams travel on beams of starlight.”",
-            "“Catch a falling star and make a wish.”",
-            "“The night sky is a canvas painted with dreams.”",
-            "“We look at the same stars and see different stories.”",
-            "“Beneath this vast sky, we are all connected.”",
-            "“To the stars who listen—and the dreams that are answered.”",
-            "“Silence of the night speaks louder than words.”",
-            "“One star at a time, the night writes its lullaby.”",
-            "“Even the darkest nights will end, and stars will shine.”",
-            "“Some nights the sky wraps you in a blanket of wonder.”"
-        ];
-
-
-        const sweetMessage = document.getElementById("sweetMessage");
-        const quoteContainer = document.getElementById("quoteContainer");
-
-        setInterval(() => {
-            // Fade out
-            quoteContainer.classList.add("opacity-0");
-
-            setTimeout(() => {
-                // Change text while faded out
-                const randomIndex = Math.floor(Math.random() * quotes.length);
-                sweetMessage.textContent = quotes[randomIndex];
-
-                // Fade back in
-                quoteContainer.classList.remove("opacity-0");
-            }, 700); // Match this with CSS transition-duration
-        }, 7000); // Change every 7 seconds
-    </script>
-
-    <!-- Made by link -->
+    <!-- =========================
+         CREDITS
+    ========================= -->
     <a href="https://github.com/samarthbc" target="_blank" rel="noopener noreferrer"
         class="fixed bottom-2 right-4 text-white text-xs opacity-70 hover:opacity-100 transition-opacity duration-300 z-50"
         style="font-family: 'Yusei Magic', cursive; text-shadow: 0 0 4px rgba(255, 255, 255, 0.2);">
         Made by Samarth ✨❤️
     </a>
 
+    <!-- WISH MODEL -->
+    <!-- Wish Modal (Styled to Match Theme) -->
+    <div id="wishModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+        <div class="bg-gradient-to-br from-black via-gray-900 to-black p-6 rounded-2xl shadow-2xl border border-white/20 w-[90%] max-w-md text-white relative"
+            style="font-family: 'Yusei Magic', cursive; text-shadow: 0 0 6px rgba(255, 255, 255, 0.2);">
+            <h2 class="text-2xl text-center mb-4"><i class="fa-solid fa-meteor"></i> Make a Wish <i class="fa-solid fa-meteor"></i></h2>
+            <textarea id="wishInput" rows="4"
+                class="w-full p-4 rounded-lg bg-black/40 border border-white/10 text-white placeholder-white/50 resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
+                placeholder="What do you wish for under the stars?"></textarea>
+            <div class="mt-4 flex justify-end gap-3">
+                <button onclick="closeWishModal()"
+                    class="px-4 py-2 rounded bg-white/10 hover:bg-white/20 border border-white/20">
+                    Cancel
+                </button>
+                <button onclick="submitWish()" class="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 shadow-lg">
+                    Send Wish
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- =========================
+         JAVASCRIPT SECTION
+    ========================= -->
+    <script>
+        // =========================
+        // SKY CONFIGURATION
+        // =========================
+        function setSky(date) {
+            const baseUrl = "https://virtualsky.lco.global/embed/index.html?longitude=77.5775&latitude=12.9629&projection=stereo&meteorshowers=true&showstarlabels=true";
+
+            if (date === "now") {
+                document.getElementById("skyIframe").src = baseUrl + "&az=75.5";
+            } else {
+                document.getElementById("skyIframe").src = baseUrl + "&clock=May%2031%20" + date + "%2000:00:00%20GMT+0530%20(India%20Standard%20Time)";
+            }
+        }
+
+        // =========================
+        // YEAR MENU SETUP
+        // =========================
+        function initializeYearMenu() {
+            const yearMenu = document.getElementById('yearMenu');
+
+            // Add "Now" button
+            const nowBtn = document.createElement('button');
+            nowBtn.textContent = "Now";
+            nowBtn.className = "w-full text-left px-3 py-1 rounded hover:bg-white/10";
+            nowBtn.onclick = () => { setSky("now"); toggleMenu(); };
+            yearMenu.appendChild(nowBtn);
+
+            // Add year buttons (2005-2025)
+            for (let i = 2005; i <= 2025; i++) {
+                const btn = document.createElement('button');
+                btn.textContent = `May 31, ${i}`;
+                btn.className = "w-full text-left px-3 py-1 rounded hover:bg-white/10";
+                btn.onclick = () => { setSky(i); toggleMenu(); };
+                yearMenu.appendChild(btn);
+            }
+        }
+
+        function toggleMenu() {
+            document.getElementById('yearMenu').classList.toggle('hidden');
+        }
+
+        // =========================
+        // MAKE A WISH FUNCTIONALITY
+        // =========================
+        function makeWish() {
+            document.getElementById('wishModal').classList.remove('hidden');
+            document.getElementById('wishInput').value = ''; // Clear previous input
+        }
+
+
+        function closeWishModal() {
+            document.getElementById('wishModal').classList.add('hidden');
+        }
+
+        function submitWish() {
+            const wishText = document.getElementById('wishInput').value.trim();
+
+            // Show feedback immediately
+            const btn = document.getElementById('makeWishBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "🌟 Wishing... 🌟";
+
+            // Send POST request
+            fetch('https://your-backend-url.com/api/wish', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ wish: wishText })
+            })
+                .then(response => {
+                    if (response.ok) {
+                        createShootingStar();
+                        btn.innerHTML = "🌟 Wish Sent! 🌟";
+                    } else {
+                        alert("Something went wrong. Please try again.");
+                        btn.innerHTML = originalText;
+                    }
+                    closeWishModal();
+                })
+                .catch(error => {
+                    closeWishModal();
+                })
+                .finally(() => {
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        createShootingStar()
+                    }, 3000);
+                });
+        }
+
+
+
+
+        // =========================
+        // PARTICLE SYSTEM
+        // =========================
+        function initializeParticles() {
+            tsParticles.load("tsparticles", {
+                background: {
+                    color: {
+                        value: "transparent"
+                    }
+                },
+                fpsLimit: 60,
+                particles: {
+                    number: {
+                        value: 80,
+                        density: {
+                            enable: true,
+                            area: 800
+                        }
+                    },
+                    color: {
+                        value: "#FFA500"
+                    },
+                    opacity: {
+                        value: 0.5,
+                        random: true
+                    },
+                    size: {
+                        value: 1.5,
+                        random: true
+                    },
+                    move: {
+                        enable: true,
+                        speed: 0.1,
+                        direction: "none",
+                        outMode: "bounce"
+                    }
+                },
+                detectRetina: true
+            });
+        }
+
+        // =========================
+        // AUDIO CONTROLS
+        // =========================
+        function initializeAudioControls() {
+            const music = document.getElementById("bgMusic");
+            const volumeIcon = document.getElementById("volumeIcon");
+            const volumeSlider = document.getElementById("volumeSlider");
+
+            // Volume icon changes based on slider
+            volumeSlider.addEventListener("input", () => {
+                const vol = volumeSlider.value / 100;
+                music.volume = vol;
+
+                if (vol === 0) {
+                    volumeIcon.className = "fa-solid fa-volume-xmark";
+                } else if (vol <= 0.3) {
+                    volumeIcon.className = "fa-solid fa-volume-off";
+                } else if (vol <= 0.6) {
+                    volumeIcon.className = "fa-solid fa-volume-low";
+                } else {
+                    volumeIcon.className = "fa-solid fa-volume-high";
+                }
+            });
+
+            // Handle autoplay block
+            document.addEventListener("click", () => {
+                if (music.paused) {
+                    music.play().catch(() => { });
+                }
+            }, { once: true });
+        }
+
+        // =========================
+        // QUOTE ROTATION SYSTEM
+        // =========================
+        function initializeQuoteRotation() {
+            const quotes = [
+                "“The sky whispers secrets to those who dream.”",
+                "“Every night holds a promise of wonder.”",
+                "“In stardust, we are born.”",
+                "“Let your soul drift where the stars sleep.”",
+                "“The cosmos is within us; we are made of star stuff.”",
+                "“Across the universe, dreams travel on beams of starlight.”",
+                "“Catch a falling star and make a wish.”",
+                "“The night sky is a canvas painted with dreams.”",
+                "“We look at the same stars and see different stories.”",
+                "“Beneath this vast sky, we are all connected.”",
+                "“To the stars who listen—and the dreams that are answered.”",
+                "“Silence of the night speaks louder than words.”",
+                "“One star at a time, the night writes its lullaby.”",
+                "“Even the darkest nights will end, and stars will shine.”",
+                "“Some nights the sky wraps you in a blanket of wonder.”"
+            ];
+
+            const sweetMessage = document.getElementById("sweetMessage");
+            const quoteContainer = document.getElementById("quoteContainer");
+
+            setInterval(() => {
+                // Fade out
+                quoteContainer.classList.add("opacity-0");
+
+                setTimeout(() => {
+                    // Change text while faded out
+                    const randomIndex = Math.floor(Math.random() * quotes.length);
+                    sweetMessage.textContent = quotes[randomIndex];
+
+                    // Fade back in
+                    quoteContainer.classList.remove("opacity-0");
+                }, 700); // Match CSS transition-duration
+            }, 7000); // Change every 7 seconds
+        }
+
+        // =========================
+        // BIRTHDAY SPLASH & CONFETTI
+        // =========================
+        function initializeBirthdaySplash() {
+            // Launch confetti from multiple directions
+            confetti({
+                particleCount: 500,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0, y: 0.6 }
+            });
+
+            confetti({
+                particleCount: 1000,
+                spread: 100,
+                origin: { x: 0.5, y: 0.6 }
+            });
+
+            confetti({
+                particleCount: 500,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1, y: 0.6 }
+            });
+
+            // Hide splash screen after 4 seconds
+            setTimeout(() => {
+                const splash = document.getElementById('birthdaySplash');
+                splash.style.transition = 'opacity 1s ease-out';
+                splash.style.opacity = '0';
+
+                setTimeout(() => {
+                    splash.style.display = 'none';
+                }, 1000);
+            }, 4000);
+        }
+
+        // =========================
+        // SHOOTING STAR CREATION
+        // =========================
+        function createShootingStar() {
+            console.log("Creating shooting star..."); // Debug log
+
+            const star = document.createElement('div');
+            star.className = 'shooting-star';
+
+            // Random start position (top-left area of viewport)
+            const startX = -50 + Math.random() * 100; // -50px to 50px
+            const startY = Math.random() * 200; // 0 to 200px from top
+
+            // Random end position (bottom-right area of viewport)
+            const endX = window.innerWidth - 100 + Math.random() * 100;
+            const endY = window.innerHeight - 200 + Math.random() * 100;
+
+            // Set CSS custom properties for the animation
+            star.style.setProperty('--start-x', `${startX}px`);
+            star.style.setProperty('--start-y', `${startY}px`);
+            star.style.setProperty('--end-x', `${endX}px`);
+            star.style.setProperty('--end-y', `${endY}px`);
+
+            // Position the star at starting point
+            star.style.left = `${startX}px`;
+            star.style.top = `${startY}px`;
+
+            // Append to body
+            document.body.appendChild(star);
+            console.log("Shooting star added to DOM"); // Debug log
+
+            // Start the animation
+            requestAnimationFrame(() => {
+                star.style.animation = 'shooting-star-move 3s ease-out forwards';
+            });
+
+            // Create sparkle trail effect
+            let sparkleCount = 8;
+            let sparkleDelay = 0;
+
+            const createSparkle = () => {
+                if (sparkleCount <= 0) return;
+
+                const sparkle = document.createElement('div');
+                sparkle.className = 'trail-sparkle';
+
+                // Get current star position
+                const rect = star.getBoundingClientRect();
+                const xOffset = (Math.random() - 0.5) * 30;
+                const yOffset = (Math.random() - 0.5) * 30;
+
+                sparkle.style.left = `${rect.left + rect.width / 2 + xOffset}px`;
+                sparkle.style.top = `${rect.top + rect.height / 2 + yOffset}px`;
+
+                document.body.appendChild(sparkle);
+
+                // Remove sparkle after animation
+                setTimeout(() => {
+                    if (sparkle.parentNode) {
+                        sparkle.remove();
+                    }
+                }, 1500);
+
+                sparkleCount--;
+                if (sparkleCount > 0) {
+                    setTimeout(createSparkle, 300);
+                }
+            };
+
+            // Start creating sparkles after a short delay
+            setTimeout(createSparkle, 200);
+
+            // Remove star after animation completes
+            setTimeout(() => {
+                if (star.parentNode) {
+                    star.remove();
+                }
+                console.log("Shooting star removed"); // Debug log
+            }, 3200);
+        }
+
+        // =========================
+        // INITIALIZATION
+        // =========================
+        window.addEventListener('load', () => {
+            initializeYearMenu();
+            initializeParticles();
+            initializeAudioControls();
+            initializeQuoteRotation();
+            initializeBirthdaySplash();
+
+            // Test shooting star on load (remove this line if not needed)
+            // setTimeout(() => {
+            //     console.log("Creating test shooting star");
+            //     createShootingStar();
+            // }, 6000);
+        });
+    </script>
 
 </body>
 
