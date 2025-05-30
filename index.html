@@ -419,11 +419,10 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ wish: wishText })
+                body: JSON.stringify({ "text": wishText })
             })
                 .then(response => {
                     if (response.ok) {
-                        createShootingStar();
                         btn.innerHTML = "🌟 Wish Sent! 🌟";
                     } else {
                         alert("Something went wrong. Please try again.");
@@ -437,6 +436,7 @@
                 .finally(() => {
                     setTimeout(() => {
                         btn.innerHTML = originalText;
+                        createShootingStar()
                         createShootingStar()
                     }, 3000);
                 });
@@ -592,7 +592,7 @@
                 setTimeout(() => {
                     splash.style.display = 'none';
                 }, 1000);
-            }, 4000);
+            }, 7000);
         }
 
         // =========================
