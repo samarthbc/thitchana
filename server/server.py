@@ -27,6 +27,7 @@ class Sentence(BaseModel):
 @app.post("/wish")
 async def add_sentence(sentence: Sentence):
     try:
+        print(sentence.text)
         result = collection.insert_one({"text": sentence.text})
         return {"message": "Sentence stored", "id": str(result.inserted_id)}
     except PyMongoError as e:
